@@ -122,3 +122,21 @@ def sumar(a, b):
 - **Validad salidas**: Asegúrate de que las funciones manejen adecuadamente entradas inválidas o inesperadas.
 - **Modularidad**: Divide el código en funciones pequeñas y reutilizables en lugar de tener grandes bloques de código monolíticos.
 
+
+# Introducción al Testing en Python:
+
+## probar nuestro código:
+En programación, el testing se refiere al proceso de verificar que nuestro código funciona correctamente. Es una parte esencial del desarrollo de software, ya que nos ayuda a identificar y corregir errores antes de que el código se utilice en un entorno real.
+
+Esto es fundamental incluir mecanismos que:
+- Detecten errores en el código.
+- Verifiquen que las funciones y módulos funcionan como realmente lo dice en su docstring.
+- Faciliten el mantenimiento del código a lo largo del tiempo.
+
+Con la instrucción `assert`, podemos comprobar que una condición es verdadera. Si la condición es falsa, Python lanza una excepción `AssertionError`, lo que nos indica que algo no está funcionando como se esperaba.
+
+Hay una libreria que se llama pytest que nos permite hacer testing de una manera más organizada y profesional. Lo hacemos mediante importar la libreria y crear funciones de prueba que verifiquen el comportamiento de nuestro código.
+
+## Refactorización de código
+Refactorizar código significa reorganizar y mejorar el código existente sin cambiar su comportamiento externo. El objetivo de la refactorización es hacer que el código sea más limpio, eficiente y fácil de entender.
+

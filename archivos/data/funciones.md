@@ -48,3 +48,77 @@ Aunque a menudo se usan indistintamente, hay una diferencia sutil entre funcione
 - **Retorno**: Una función puede devolver un valor usando la palabra clave `return`. Si no se especifica un valor de retorno, la función devuelve `None` por defecto.
 
 **Nota importante** : En Python no se ejeucuta el bloque de código dentro de la función hasta que se llama a la función.
+
+Cuando se usa el comando print dentro de una función, la función realiza la acción de imprimir en pantalla, pero no devuelve un valor que pueda ser utilizado en otras partes del programa. Por lo tanto, si intentas asignar el resultado de una función que solo imprime a una variable, esa variable contendrá `None`, ya que la función no tiene un valor de retorno explícito.
+
+## Ambito de las variables en funciones
+El ámbito de una variable se refiere a la parte del programa donde esa variable es accesible. En Python, las variables definidas dentro de una función tienen un ámbito local, lo que significa que solo son accesibles dentro de esa función. Por otro lado, las variables definidas fuera de cualquier función tienen un ámbito global y pueden ser accesibles desde cualquier parte del programa, incluyendo dentro de las funciones, a menos que se declare una variable local con el mismo nombre.
+
+¿Qué es el scope o ámbito de una variable?
+El ámbito de una variable se refiere a la parte del programa donde esa variable es accesible. En Python, las variables definidas dentro de una función tienen un ámbito local, lo que significa que solo son accesibles dentro de esa función. 
+
+Funciones locales y globales:
+- **Variables locales**: Son aquellas definidas dentro de una función. Solo pueden ser utilizadas dentro de esa función y no son accesibles desde fuera.
+- **Variables globales**: Son aquellas definidas fuera de cualquier función. Pueden ser accedidas desde cualquier parte del programa, incluyendo dentro de las funciones, a menos que se declare una variable local con el mismo nombre.
+
+Python busca las variables en el siguiente orden:
+1. Ámbito local: Primero busca la variable dentro de la función.
+2. Ámbito escoling: Si la función está anidada dentro de otra función, busca en la función contenedora.
+3. Ámbito global: Luego busca en el ámbito global del módulo.
+4. Ámbito built-in: Finalmente, busca en las funciones incorporadas de Python.
+
+## Argumentos para personalizar el resultado de una función
+Los argumentos son valores que se pasan a una función cuando se llama. Estos valores permiten personalizar el comportamiento de la función según las necesidades específicas del momento. Por ejemplo, si tienes una función que calcula el área de un rectángulo, puedes pasarle los valores de la base y la altura como argumentos para obtener el área correspondiente.  
+
+## Paso de argumentos:
+
+Existen diferentes formas de pasar argumentos a una función en Python:
+- **Por posición**: Los argumentos se pasan en el orden en que se definen los parámetros en la función.
+- **Por nombre**: Los argumentos se pasan especificando el nombre del parámetro, lo que permite cambiar el orden de los argumentos. Si usamos los nombres no es necesario respetar el orden.
+- **Valores por defecto**: Los parámetros pueden tener valores por defecto, que se usan si no se proporciona un argumento al llamar a la función. Es para decir que si no se pasa un valor, la función usará el valor por defecto.
+- **Argumentos variables**: Se pueden usar `*args` para pasar un número variable de argumentos posicionales y `**kwargs` para pasar un número variable de argumentos nombrados. Permite que una cantidad variable de argumentos sean pasados a la función.
+
+Por ejemplo como usar ars y kwargs:
+```python
+def suma (*numeros):
+    total = 0
+    for numero in numeros:
+        total += numero
+    return total
+resultado = suma(1, 2, 3, 4, 5)
+print(resultado)  # Salida: 15
+```
+
+```python
+def imprimir_info(**info):
+    for clave, valor in info.items():
+        print(f"{clave}: {valor}")  
+imprimir_info(nombre="Ana", edad=30, ciudad="Madrid")
+# Salida:
+# nombre: Ana
+# edad: 30      
+
+```
+
+## Buenas prácticas al usar funciones:
+- **Nombres descriptivos**: Usa nombres claros y descriptivos para las funciones y sus parámetros.
+- **Una sola tarea**: Cada función debe realizar una sola tarea específica.
+- **Retornar valores, no imprimir**: Evita usar `print` dentro de las funciones; en su lugar, retorna valores para que puedan ser usados posteriormente.
+- **Valores por defecto**: Usa valores por defecto para parámetros cuando sea apropiado, para hacer las funciones más flexibles.
+- **Docstrings**: Incluye docstrings para describir lo que hace la función, sus parámetros y su valor de retorno. Docstrings son cadenas de texto que se colocan justo después de la definición de una función para documentar su propósito y uso.
+  
+```python
+def sumar(a, b):
+    """Suma dos números y devuelve el resultado.    
+    Parámetros:
+    a (int, float): El primer número.
+    b (int, float): El segundo número.  
+    Retorna:
+    int, float: La suma de a y b.
+    """
+    return a + b
+```
+-**Probar con assert**: Usa declaraciones `assert` para verificar que las funciones funcionan como se espera durante el desarrollo.
+- **Validad salidas**: Asegúrate de que las funciones manejen adecuadamente entradas inválidas o inesperadas.
+- **Modularidad**: Divide el código en funciones pequeñas y reutilizables en lugar de tener grandes bloques de código monolíticos.
+

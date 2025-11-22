@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-TODO: Completar este programa de piedra, papel o tijera.
+Completar este programa de piedra, papel o tijera.
 
 Instrucciones:
 - El juego debe pedir al usuario "rock", "paper" o "scissors".
@@ -15,44 +15,45 @@ Instrucciones:
 
 import random
 
-# TODO 1: Lista de opciones válidas
 VALID_CHOICES = ["rock", "paper", "scissors"]
 
 
 def determine_result(user: str, cpu: str) -> str:
     """
-    TODO 2: Determinar si el usuario gana, pierde o empata.
+    Determina si el usuario gana, pierde o empata en el juego de piedra, papel o tijera.
 
-    Debe regresar:
-    - "win"
-    - "lose"
-    - "draw"
+    Args:
+        user (str): La elección del usuario. Debe ser 'piedra', 'papel' o 'tijera'.
+        cpu (str): La elección de la CPU. Debe ser 'piedra', 'papel' o 'tijera'.
+
+    Returns:
+        str: 'win' si el usuario gana, 'lose' si pierde, y 'draw' si empatan.
     """
-    # TODO: implementar la lógica del juego
-    pass
+    if user == cpu:
+        return "draw"
+    elif (user == "piedra" and cpu == "tijera") or \
+         (user == "papel" and cpu == "piedra") or \
+         (user == "tijera" and cpu == "papel"):
+        return "win"
+    else:
+        return "lose"
 
 
 def play(user_choice: str) -> tuple[str, str]:
     """
-    TODO 3: Ejecutar una ronda del juego.
+    Ejecutar una ronda del juego.
 
-    Debe regresar una tupla:
+    Regresa una tupla:
         (eleccion_cpu, resultado)
-
-    - Validar que user_choice esté en VALID_CHOICES
-    - Elegir opción aleatoria para la CPU
-    - Llamar a determine_result()
     """
-    # TODO: Validar entrada
-    # TODO: Elegir para la CPU usando random.choice()
-    # TODO: Llamar determine_result()
-    # TODO: retornar tupla (cpu_choice, result)
-    pass
+    cpu_choice = random.choice(VALID_CHOICES)
+    result = determine_result(user_choice, cpu_choice)
+    return cpu_choice, result
 
 
 def main() -> None:
     """
-    TODO 4: Hacer que el juego se repita usando un ciclo while.
+    Hacer que el juego se repita usando un ciclo while.
 
     - Pedir la elección con input()
     - Salir si el usuario presiona ENTER
@@ -66,8 +67,27 @@ def main() -> None:
     print("Presiona ENTER sin escribir nada para salir.")
     print("-" * 40)
 
-    # TODO: implementar ciclo del juego
-    pass
+    while True:
+        user_input = input("Tu elección: ")
+        if not user_input:
+            break
+        if user_input not in VALID_CHOICES:
+            print("Elección no válida. Intenta de nuevo.")
+            continue
+
+        cpu_choice, result = play(user_input)
+
+        print(f"CPU: {cpu_choice}")
+        print(f"Resultado: {result}")
+
+        if result == "win":
+            print("🎉✨🎆🎇🚀 ¡Ganaste!")
+        elif result == "lose":
+            print("😢 Perdiste. Inténtalo de nuevo.")
+        else:
+            print("🤝 Empate. Ambos eligieron lo mismo.")
+
+    print("Gracias por jugar. ¡Hasta luego!")
 
 
 if __name__ == "__main__":

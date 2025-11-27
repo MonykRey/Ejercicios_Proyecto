@@ -4,13 +4,40 @@
 import argparse
 import os
 import sys
-from typing import Tuple
+from typing import Tuple, Dict
+from dataclasses import dataclass
 
 # ---------------------------
 # CONSTANTES
 # ---------------------------
-VALID_BASES = {"A", "T", "G", "C"}
+NUCLEOTIDE_BASES = {"A", "T", "G", "C"}
 MAX_FILE_SIZE_MB = 100
+
+
+# ---------------------------
+# DATACLASSES
+# ---------------------------
+@dataclass
+class FrequencyResult:
+    """Resultado del análisis de frecuencias."""
+    header: str
+    sequence_length: int
+    frequencies: Dict[str, int]
+    invalid_chars_count: int
+    
+    def get_percentage(self, base: str) -> float:
+        """Calcula porcentaje de una base."""
+        if self.sequence_length == 0:
+            return 0.0
+        return round((self.frequencies[base] / self.sequence_length) * 100, 2)
+
+
+@dataclass
+class CleaningResult:
+    """Resultado de limpiar una secuencia."""
+    cleaned: str
+    invalid_chars: Dict[str, int]
+    invalid_count: int
 
 # ---------------------------
 # ARGPARSE
@@ -120,31 +147,39 @@ def extract_header_and_sequence(fasta_text: str) -> Tuple[str, str]:
     return header, sec
 
 
-def clean_sequence(raw_seq: str, header: str) -> str:
+def clean_sequence(raw_seq: str, header: str) -> CleaningResult:
     """
-    Filtra y devuelve solo las bases válidas A/T/G/C en mayúsculas.
+    Filtra y retorna solo las bases válidas A/T/G/C en mayúsculas.
     
-    Manejo mejorado de caracteres inválidos:
-    - Cuenta caracteres inválidos en lugar de printear cada uno
-    - Proporciona resumen al final
-    - Diferencia entre distintos tipos de caracteres inválidos
+    Retorna un objeto CleaningResult con:
+    - cleaned: secuencia limpia
+    - invalid_chars: diccionario con conteos de caracteres inválidos
+    - invalid_count: total de caracteres inválidos encontrados
     """
     seq_limpia_chars = []
     invalid_chars = {}
     invalid_count = 0
     
     for base in raw_seq:
-        if base in VALID_BASES:
+        if base in NUCLEOTIDE_BASES:
             seq_limpia_chars.append(base)
         else:
             invalid_count += 1
             # Contar ocurrencias de cada carácter inválido
             invalid_chars[base] = invalid_chars.get(base, 0) + 1
     
-    # Mostrar resumen una sola vez
-    if invalid_count > 0:
-        print(f"Aviso: Se encontraron {invalid_count} caracteres inválidos en '{header}':")
-        for char, count in sorted(invalid_chars.items()):
+    return CleaningResult(
+        cleaned="".join(seq_limpia_chars),
+        invalid_chars=invalid_chars,
+        invalid_count=invalid_count
+    )
+
+
+def print_cleaning_warnings(header: str, result: CleaningResult) -> None:
+    """Imprime advertencias sobre caracteres inválidos encontrados."""
+    if result.invalid_count > 0:
+        print(f"Aviso: Se encontraron {result.invalid_count} caracteres inválidos en '{header}':")
+        for char, count in sorted(result.invalid_chars.items()):
             if char == ' ':
                 print(f"  - espacio: {count} ocurrencia(s)")
             elif char == '\t':
@@ -153,35 +188,70 @@ def clean_sequence(raw_seq: str, header: str) -> str:
                 print(f"  - salto de línea: {count} ocurrencia(s)")
             else:
                 print(f"  - '{char}': {count} ocurrencia(s)")
-    
-    return "".join(seq_limpia_chars)
 
 
-def calc_and_print_frequencies(header: str, seq_limpia: str) -> None:
+def calc_frequencies(seq_limpia: str) -> Dict[str, int]:
     """
-    Calcula los conteos y porcentajes y los imprime en el mismo formato que el programa original.
+    Calcula el conteo de bases nucleotídicas.
     
-    Validación: Protege contra división por cero si seq_limpia está vacía.
+    Args:
+        seq_limpia: Secuencia limpia (solo A, T, G, C)
+    
+    Returns:
+        Diccionario con conteos: {"A": int, "T": int, "G": int, "C": int}
+    
+    Raises:
+        ValueError: Si la secuencia está vacía.
     """
-    total = len(seq_limpia)
-    
-    # Proteger contra división por cero
-    if total == 0:
+    if len(seq_limpia) == 0:
         raise ValueError("CALCULATION_ERROR: La secuencia limpia está vacía. No se puede calcular frecuencias.")
     
-    a = seq_limpia.count("A")
-    t = seq_limpia.count("T")
-    g = seq_limpia.count("G")
-    c = seq_limpia.count("C")
+    return {
+        "A": seq_limpia.count("A"),
+        "T": seq_limpia.count("T"),
+        "G": seq_limpia.count("G"),
+        "C": seq_limpia.count("C"),
+    }
 
-    print("Encabezado:", header)
-    print("Longitud secuencia válida:", total)
+
+def get_frequency_result(header: str, seq_limpia: str) -> FrequencyResult:
+    """
+    Calcula frecuencias y retorna un objeto FrequencyResult.
+    
+    Args:
+        header: Encabezado de la secuencia FASTA
+        seq_limpia: Secuencia limpia
+    
+    Returns:
+        FrequencyResult con todos los datos de frecuencia
+    
+    Raises:
+        ValueError: Si la secuencia está vacía.
+    """
+    frequencies = calc_frequencies(seq_limpia)
+    return FrequencyResult(
+        header=header,
+        sequence_length=len(seq_limpia),
+        frequencies=frequencies,
+        invalid_chars_count=0
+    )
+
+
+def print_frequencies(result: FrequencyResult) -> None:
+    """
+    Imprime las frecuencias de bases en formato legible.
+    
+    Args:
+        result: Objeto FrequencyResult con los datos de frecuencia.
+    """
+    print("Encabezado:", result.header)
+    print("Longitud secuencia válida:", result.sequence_length)
     print("Frecuencias:")
-    # Mantener redondeo y formato exactamente igual
-    print("A:", a, f"({round((a/total)*100,2)}%)")
-    print("T:", t, f"({round((t/total)*100,2)}%)")
-    print("G:", g, f"({round((g/total)*100,2)}%)")
-    print("C:", c, f"({round((c/total)*100,2)}%)")
+    
+    for base in ["A", "T", "G", "C"]:
+        count = result.frequencies[base]
+        percentage = result.get_percentage(base)
+        print(f"{base}: {count} ({percentage}%)")
 
 
 def main(argv=None) -> None:
@@ -239,7 +309,9 @@ def main(argv=None) -> None:
 
     # Limpiar secuencia
     try:
-        seq_limpia = clean_sequence(sec, header)
+        cleaning_result = clean_sequence(sec, header)
+        seq_limpia = cleaning_result.cleaned
+        print_cleaning_warnings(header, cleaning_result)
     except Exception as e:
         print(f"Error al limpiar la secuencia: {e}")
         sys.exit(1)
@@ -249,9 +321,10 @@ def main(argv=None) -> None:
         print("Error: la secuencia no contiene bases válidas (A,T,G,C).")
         sys.exit(1)
 
-    # Manejo de errores en cálculo de frecuencias
+    # Calcular y mostrar frecuencias
     try:
-        calc_and_print_frequencies(header, seq_limpia)
+        result = get_frequency_result(header, seq_limpia)
+        print_frequencies(result)
     except ValueError as e:
         print(f"Error: {e}")
         sys.exit(1)

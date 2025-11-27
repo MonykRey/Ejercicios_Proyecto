@@ -1,5 +1,31 @@
 #!/usr/bin/env python3
-# archivo: src/base_freq.py
+"""Análisis de frecuencias de bases nucleotídicas en archivos FASTA.
+
+Este módulo proporciona funcionalidades para procesar secuencias de ADN desde
+archivos en formato FASTA, limpiar caracteres inválidos y calcular la frecuencia
+de bases nucleotídicas (A, T, G, C).
+
+Ejemplo de uso:
+    $ python base_freq.py data/sequence.fasta
+
+Clases:
+    FrequencyResult: Encapsula resultados del análisis de frecuencias.
+    CleaningResult: Encapsula resultados de limpieza de secuencia.
+
+Funciones principales:
+    main(): Orquesta el flujo completo de procesamiento.
+    parse_args(): Procesa argumentos de línea de comandos.
+    read_file(): Lee contenido de archivo con validaciones.
+    extract_header_and_sequence(): Extrae header y secuencia de FASTA.
+    clean_sequence(): Filtra bases inválidas.
+    calc_frequencies(): Calcula conteos de bases.
+    get_frequency_result(): Crea resultado tipado.
+    print_frequencies(): Presenta resultados.
+
+Autor: Bioinformática
+Fecha: 2025-11-26
+Versión: 2.0 (Refactored)
+"""
 
 import argparse
 import os
@@ -7,34 +33,69 @@ import sys
 from typing import Tuple, Dict
 from dataclasses import dataclass
 
-# ---------------------------
+# =============================================================================
 # CONSTANTES
-# ---------------------------
+# =============================================================================
+# Bases nucleotídicas válidas en ADN
 NUCLEOTIDE_BASES = {"A", "T", "G", "C"}
+
+# Tamaño máximo de archivo permitido en MB (100 MB)
 MAX_FILE_SIZE_MB = 100
 
 
-# ---------------------------
-# DATACLASSES
-# ---------------------------
+# =============================================================================
+# DATACLASSES - Estructuras de datos para resultados
+# =============================================================================
+
+
 @dataclass
 class FrequencyResult:
-    """Resultado del análisis de frecuencias."""
+    """Encapsula el resultado del análisis de frecuencias de bases.
+    
+    Atributos:
+        header (str): Identificador de la secuencia FASTA.
+        sequence_length (int): Longitud de la secuencia limpia.
+        frequencies (Dict[str, int]): Conteos de cada base: A, T, G, C.
+        invalid_chars_count (int): Total de caracteres inválidos encontrados.
+    """
+
     header: str
     sequence_length: int
     frequencies: Dict[str, int]
     invalid_chars_count: int
-    
+
     def get_percentage(self, base: str) -> float:
-        """Calcula porcentaje de una base."""
+        """Calcula el porcentaje de una base específica.
+        
+        Args:
+            base (str): La base nucleotídica (A, T, G o C).
+        
+        Returns:
+            float: Porcentaje redondeado a 2 decimales. Retorna 0.0 si
+                   sequence_length es 0 para evitar división por cero.
+        
+        Ejemplo:
+            >>> result = FrequencyResult("seq1", 4, {"A": 1, "T": 1, "G": 1, "C": 1}, 0)
+            >>> result.get_percentage("A")
+            25.0
+        """
         if self.sequence_length == 0:
             return 0.0
-        return round((self.frequencies[base] / self.sequence_length) * 100, 2)
+        return round(
+            (self.frequencies[base] / self.sequence_length) * 100, 2
+        )
 
 
 @dataclass
 class CleaningResult:
-    """Resultado de limpiar una secuencia."""
+    """Encapsula el resultado de limpiar una secuencia.
+    
+    Atributos:
+        cleaned (str): Secuencia con solo bases válidas (A, T, G, C).
+        invalid_chars (Dict[str, int]): Conteos de cada carácter inválido.
+        invalid_count (int): Total de caracteres inválidos encontrados.
+    """
+
     cleaned: str
     invalid_chars: Dict[str, int]
     invalid_count: int

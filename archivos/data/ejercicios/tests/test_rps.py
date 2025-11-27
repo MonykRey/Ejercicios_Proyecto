@@ -11,10 +11,10 @@ import sys
 from pathlib import Path
 
 # Agregar src al path para importar módulos
-sys.path.insert(0, str(Path(__file__).parent))
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from src import config
-from src.rps import determine_result, validate_input, play
+import config
+import rps
 
 
 class TestDetermineResult(unittest.TestCase):
@@ -22,31 +22,31 @@ class TestDetermineResult(unittest.TestCase):
 
     def test_draw_scenarios(self):
         """Probar todos los casos de empate."""
-        self.assertEqual(determine_result("rock", "rock"), "draw")
-        self.assertEqual(determine_result("paper", "paper"), "draw")
-        self.assertEqual(determine_result("scissors", "scissors"), "draw")
+        self.assertEqual(rps.determine_result("rock", "rock"), "draw")
+        self.assertEqual(rps.determine_result("paper", "paper"), "draw")
+        self.assertEqual(rps.determine_result("scissors", "scissors"), "draw")
 
     def test_win_scenarios(self):
         """Probar todos los casos de victoria."""
         # Rock gana a scissors
-        self.assertEqual(determine_result("rock", "scissors"), "win")
+        self.assertEqual(rps.determine_result("rock", "scissors"), "win")
         # Paper gana a rock
-        self.assertEqual(determine_result("paper", "rock"), "win")
+        self.assertEqual(rps.determine_result("paper", "rock"), "win")
         # Scissors gana a paper
-        self.assertEqual(determine_result("scissors", "paper"), "win")
+        self.assertEqual(rps.determine_result("scissors", "paper"), "win")
 
     def test_lose_scenarios(self):
         """Probar todos los casos de derrota."""
         # Rock pierde contra paper
-        self.assertEqual(determine_result("rock", "paper"), "lose")
+        self.assertEqual(rps.determine_result("rock", "paper"), "lose")
         # Paper pierde contra scissors
-        self.assertEqual(determine_result("paper", "scissors"), "lose")
+        self.assertEqual(rps.determine_result("paper", "scissors"), "lose")
         # Scissors pierde contra rock
-        self.assertEqual(determine_result("scissors", "rock"), "lose")
+        self.assertEqual(rps.determine_result("scissors", "rock"), "lose")
 
     def test_return_type(self):
         """Verificar que retorna string."""
-        result = determine_result("rock", "scissors")
+        result = rps.determine_result("rock", "scissors")
         self.assertIsInstance(result, str)
 
 
@@ -55,51 +55,51 @@ class TestValidateInput(unittest.TestCase):
 
     def test_valid_inputs(self):
         """Probar entradas válidas."""
-        self.assertEqual(validate_input("rock"), "rock")
-        self.assertEqual(validate_input("paper"), "paper")
-        self.assertEqual(validate_input("scissors"), "scissors")
+        self.assertEqual(rps.validate_input("rock"), "rock")
+        self.assertEqual(rps.validate_input("paper"), "paper")
+        self.assertEqual(rps.validate_input("scissors"), "scissors")
 
     def test_case_insensitive(self):
         """Probar que es insensible a mayúsculas."""
-        self.assertEqual(validate_input("ROCK"), "rock")
-        self.assertEqual(validate_input("PaPeR"), "paper")
-        self.assertEqual(validate_input("SCISSORS"), "scissors")
+        self.assertEqual(rps.validate_input("ROCK"), "rock")
+        self.assertEqual(rps.validate_input("PaPeR"), "paper")
+        self.assertEqual(rps.validate_input("SCISSORS"), "scissors")
 
     def test_whitespace_handling(self):
         """Probar que maneja espacios en blanco."""
-        self.assertEqual(validate_input("  rock  "), "rock")
-        self.assertEqual(validate_input("\tpaper\n"), "paper")
-        self.assertEqual(validate_input("   scissors   "), "scissors")
+        self.assertEqual(rps.validate_input("  rock  "), "rock")
+        self.assertEqual(rps.validate_input("\tpaper\n"), "paper")
+        self.assertEqual(rps.validate_input("   scissors   "), "scissors")
 
     def test_empty_input(self):
         """Probar que rechaza entrada vacía."""
-        self.assertIsNone(validate_input(""))
-        self.assertIsNone(validate_input("   "))
-        self.assertIsNone(validate_input("\t"))
+        self.assertIsNone(rps.validate_input(""))
+        self.assertIsNone(rps.validate_input("   "))
+        self.assertIsNone(rps.validate_input("\t"))
 
     def test_invalid_choices(self):
         """Probar que rechaza opciones inválidas."""
-        self.assertIsNone(validate_input("piedra"))
-        self.assertIsNone(validate_input("invalid"))
-        self.assertIsNone(validate_input("xyz"))
+        self.assertIsNone(rps.validate_input("piedra"))
+        self.assertIsNone(rps.validate_input("invalid"))
+        self.assertIsNone(rps.validate_input("xyz"))
 
     def test_special_characters(self):
         """Probar que rechaza caracteres especiales."""
-        self.assertIsNone(validate_input("rock!"))
-        self.assertIsNone(validate_input("p@per"))
-        self.assertIsNone(validate_input("scissors#"))
+        self.assertIsNone(rps.validate_input("rock!"))
+        self.assertIsNone(rps.validate_input("p@per"))
+        self.assertIsNone(rps.validate_input("scissors#"))
 
     def test_numbers(self):
         """Probar que rechaza números."""
-        self.assertIsNone(validate_input("rock123"))
-        self.assertIsNone(validate_input("123"))
-        self.assertIsNone(validate_input("p4p3r"))
+        self.assertIsNone(rps.validate_input("rock123"))
+        self.assertIsNone(rps.validate_input("123"))
+        self.assertIsNone(rps.validate_input("p4p3r"))
 
     def test_return_type(self):
         """Verificar que retorna string o None."""
-        result = validate_input("rock")
+        result = rps.validate_input("rock")
         self.assertIsInstance(result, str)
-        result = validate_input("")
+        result = rps.validate_input("")
         self.assertIsNone(result)
 
 
@@ -108,26 +108,26 @@ class TestPlay(unittest.TestCase):
 
     def test_return_type(self):
         """Verificar que retorna una tupla de dos strings."""
-        cpu_choice, result = play("rock")
+        cpu_choice, result = rps.play("rock")
         self.assertIsInstance(cpu_choice, str)
         self.assertIsInstance(result, str)
 
     def test_valid_cpu_choice(self):
         """Verificar que la CPU elige opciones válidas."""
         for _ in range(10):  # Probar múltiples veces
-            cpu_choice, _ = play("rock")
+            cpu_choice, _ = rps.play("rock")
             self.assertIn(cpu_choice, config.VALID_CHOICES)
 
     def test_valid_result(self):
         """Verificar que el resultado es válido."""
         for _ in range(10):
-            _, result = play("rock")
+            _, result = rps.play("rock")
             self.assertIn(result, ["win", "lose", "draw"])
 
     def test_all_choices(self):
         """Probar play() con todas las opciones válidas."""
         for choice in config.VALID_CHOICES:
-            cpu_choice, result = play(choice)
+            cpu_choice, result = rps.play(choice)
             self.assertIn(cpu_choice, config.VALID_CHOICES)
             self.assertIn(result, ["win", "lose", "draw"])
 
@@ -158,32 +158,32 @@ class TestIntegration(unittest.TestCase):
         """Probar flujo completo de un juego ganado."""
         user_choice = "rock"
         # Simular CPU eligiendo scissors (que pierde contra rock)
-        validated = validate_input(user_choice)
+        validated = rps.validate_input(user_choice)
         self.assertIsNotNone(validated)
 
         # Hacer que la función play retorne una victoria simulada
-        with patch("src.rps.random.choice", return_value="scissors"):
-            cpu_choice, result = play(validated)
+        with patch("random.choice", return_value="scissors"):
+            cpu_choice, result = rps.play(validated)
             self.assertEqual(result, "win")
 
     def test_full_game_flow_draw(self):
         """Probar flujo completo de un juego empatado."""
         user_choice = "paper"
-        validated = validate_input(user_choice)
+        validated = rps.validate_input(user_choice)
         self.assertIsNotNone(validated)
 
-        with patch("src.rps.random.choice", return_value="paper"):
-            cpu_choice, result = play(validated)
+        with patch("random.choice", return_value="paper"):
+            cpu_choice, result = rps.play(validated)
             self.assertEqual(result, "draw")
 
     def test_full_game_flow_lose(self):
         """Probar flujo completo de un juego perdido."""
         user_choice = "scissors"
-        validated = validate_input(user_choice)
+        validated = rps.validate_input(user_choice)
         self.assertIsNotNone(validated)
 
-        with patch("src.rps.random.choice", return_value="rock"):
-            cpu_choice, result = play(validated)
+        with patch("random.choice", return_value="rock"):
+            cpu_choice, result = rps.play(validated)
             self.assertEqual(result, "lose")
 
 

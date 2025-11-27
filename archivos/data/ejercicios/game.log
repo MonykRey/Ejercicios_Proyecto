@@ -1,0 +1,21 @@
+2025-11-26 22:38:46,564 - game_stats - INFO - Sistema de logging inicializado.
+2025-11-26 22:38:46,564 - game_stats - INFO - Archivo de estadísticas no encontrado. Creando nuevo.
+2025-11-26 22:38:46,564 - __main__ - INFO - Gestor de estadísticas inicializado.
+2025-11-26 22:38:46,564 - __main__ - INFO - Juego iniciado.
+2025-11-26 22:38:46,564 - __main__ - INFO - Ronda 1: VICTORIA
+2025-11-26 22:38:46,564 - __main__ - INFO - Ronda 2: DERROTA
+2025-11-26 22:38:46,564 - __main__ - INFO - Ronda 3: VICTORIA
+2025-11-26 22:38:46,564 - __main__ - INFO - Usuario solicitó salir.
+2025-11-26 22:38:46,564 - __main__ - INFO - Sesión finalizada: 2W-1L-0D (66.7% victorias)
+2025-11-26 22:38:46,564 - game_stats - INFO - Sesión guardada exitosamente.
+2025-11-26 22:38:46,564 - __main__ - INFO - Juego finalizado correctamente.
+2025-11-26 22:39:19,048 - game_stats - INFO - Sistema de logging inicializado.
+2025-11-26 22:39:19,048 - game_stats - INFO - Estadísticas cargadas: 1 sesiones
+2025-11-26 22:39:19,048 - __main__ - INFO - Gestor de estadísticas inicializado.
+2025-11-26 22:39:19,048 - __main__ - INFO - Juego iniciado.
+2025-11-26 22:39:19,048 - __main__ - INFO - Ronda 1: DERROTA
+2025-11-26 22:39:19,048 - __main__ - INFO - Ronda 2: EMPATE
+2025-11-26 22:39:19,048 - __main__ - INFO - Límite de juegos alcanzado: 2
+2025-11-26 22:39:19,048 - __main__ - INFO - Sesión finalizada: 0W-1L-1D (0.0% victorias)
+2025-11-26 22:39:19,049 - game_stats - INFO - Sesión guardada exitosamente.
+2025-11-26 22:39:19,049 - __main__ - INFO - Juego finalizado correctamente.

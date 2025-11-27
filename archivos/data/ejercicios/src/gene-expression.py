@@ -22,8 +22,8 @@ Requisitos:
     - pandas: Para lectura y manipulación de datos tabulares
     - Python 3.6+
 
-Autores:
-    Proyecto Bioinformática
+Autor:
+    Monica Reyes Ramírez
 
 Versión:
     1.0
@@ -32,13 +32,21 @@ Versión:
 import argparse
 import pandas as pd
 
+# Constantes de configuración
+DEFAULT_THRESHOLD = 0.0
+SEPARATOR = "\t"
+EMPTY_MESSAGE = "No se encontraron genes con expresión >= {threshold}."
+HEADER_MESSAGE = "Genes filtrados (threshold: {threshold}):"
+TOTAL_MESSAGE = "Total: {count} genes\n"
+
 
 def load_expression_table(path):
     """
     Carga un archivo TSV con columnas 'gene' y 'expression'.
 
     Lee un archivo de valores separados por tabulaciones (TSV) que contiene
-    datos de expresión génica. Realiza validaciones y limpieza de datos.
+    datos de expresión génica. Realiza validaciones y limpieza de datos,
+    con advertencias sobre filas eliminadas.
 
     Args:
         path (str): Ruta al archivo TSV.
@@ -48,7 +56,8 @@ def load_expression_table(path):
                       con valores NaN en expression.
 
     Raises:
-        ValueError: Si el archivo no contiene las columnas 'gene' y 'expression'.
+        ValueError: Si el archivo no contiene las columnas requeridas,
+                    si está vacío, o si no hay datos válidos después de limpieza.
         FileNotFoundError: Si el archivo no existe en la ruta especificada.
 
     Example:
@@ -59,17 +68,31 @@ def load_expression_table(path):
         1  TP53          8.5
     """
     # Leer archivo TSV con pandas
-    df = pd.read_csv(path, sep="\t") 
+    df = pd.read_csv(path, sep=SEPARATOR)
 
     # Validación básica de columnas requeridas
     if "gene" not in df.columns or "expression" not in df.columns:
         raise ValueError("El archivo debe tener columnas 'gene' y 'expression'.")
 
+    # Verificar que el archivo no está vacío
+    if df.empty:
+        raise ValueError("El archivo TSV está vacío.")
+
     # Convertir expresión a numérico, valores inválidos se convierten en NaN
     df["expression"] = pd.to_numeric(df["expression"], errors="coerce")
 
-    # Eliminar filas con NaN en expression (datos incompletos)
+    # Contar filas antes de eliminar NaN
+    filas_antes = len(df)
     df = df.dropna(subset=["expression"])
+    filas_eliminadas = filas_antes - len(df)
+
+    # Advertencia si se eliminaron filas
+    if filas_eliminadas > 0:
+        print(f"⚠️  Advertencia: Se eliminaron {filas_eliminadas} filas con valores inválidos.")
+
+    # Verificar que quedan datos válidos después de limpieza
+    if df.empty:
+        raise ValueError("No hay datos válidos después de la limpieza.")
 
     return df
 
@@ -104,6 +127,32 @@ def filter_genes(df, threshold):
     filtered = filtered.sort_values("gene")
 
     return filtered
+
+
+def validate_threshold(threshold):
+    """
+    Valida que el threshold sea un número válido y no negativo.
+
+    Args:
+        threshold (float): Valor del threshold a validar.
+
+    Returns:
+        float: El threshold validado.
+
+    Raises:
+        ValueError: Si el threshold es negativo.
+
+    Example:
+        >>> validate_threshold(5.0)
+        5.0
+        >>> validate_threshold(-1.0)
+        Traceback (most recent call last):
+        ...
+        ValueError: El threshold no puede ser negativo.
+    """
+    if threshold < 0:
+        raise ValueError("El threshold no puede ser negativo.")
+    return threshold
 
 
 def build_parser():
@@ -146,38 +195,83 @@ def build_parser():
     return parser
 
 
+def print_results(filtered, threshold):
+    """
+    Imprime los genes filtrados de forma clara y ordenada.
+
+    Muestra un encabezado con el threshold usado y el total de genes encontrados,
+    seguido por la lista de genes en orden alfabético. Si no hay resultados,
+    muestra un mensaje informativo.
+
+    Args:
+        filtered (pd.DataFrame): DataFrame con genes filtrados.
+        threshold (float): Valor del threshold utilizado en el filtrado.
+
+    Example:
+        >>> print_results(filtered_df, 5.0)
+        Genes filtrados (threshold: 5.0):
+        Total: 3 genes
+
+          - BRCA1
+          - TP53
+          - MYC
+    """
+    if filtered.empty:
+        print(EMPTY_MESSAGE.format(threshold=threshold))
+        return
+
+    print(HEADER_MESSAGE.format(threshold=threshold))
+    print(TOTAL_MESSAGE.format(count=len(filtered)))
+    for gene in filtered["gene"].tolist():
+        print(f"  - {gene}")
+
+
 def main():
     """
     Función principal que orquesta el flujo del programa.
 
-    1. Parsea los argumentos de línea de comandos
-    2. Carga el archivo TSV de expresión génica
-    3. Filtra los genes según el threshold
-    4. Imprime los resultados ordenados alfabéticamente
+    Secuencia de operaciones:
+        1. Parsea los argumentos de línea de comandos
+        2. Carga el archivo TSV de expresión génica
+        3. Valida el threshold proporcionado
+        4. Filtra los genes según el threshold
+        5. Imprime los resultados ordenados alfabéticamente
 
-    Si no hay genes que cumplan el criterio, imprime un mensaje informativo.
+    Manejo de errores:
+        - FileNotFoundError: Archivo no encontrado
+        - ValueError: Columnas inválidas, datos vacíos o threshold negativo
+        - Exception: Errores inesperados
     """
-    # Construir parser y parsear argumentos
     parser = build_parser()
     args = parser.parse_args()
 
-    # Cargar datos del archivo TSV
-    df = load_expression_table(args.file)
+    try:
+        # Cargar datos del archivo TSV
+        print(f"Cargando archivo: {args.file}")
+        df = load_expression_table(args.file)
+        print(f"✓ Archivo cargado correctamente ({len(df)} genes).\n")
 
-    # Obtener threshold desde argumentos
-    threshold = args.threshold
+        # Validar y obtener threshold
+        threshold = validate_threshold(args.threshold)
 
-    # Filtrar genes con expresión >= threshold
-    filtered = filter_genes(df, threshold)
+        # Filtrar genes con expresión >= threshold
+        filtered = filter_genes(df, threshold)
 
-    # Mostrar resultados o mensaje de vacío
-    if filtered.empty:
-        print("No se encontraron genes por encima del threshold.")
-        return
+        # Mostrar resultados
+        print_results(filtered, threshold)
 
-    print("Genes filtrados:")
-    for gene in filtered["gene"].tolist():
-        print(gene)
+    except FileNotFoundError as e:
+        print(f"❌ Error: El archivo '{args.file}' no existe.")
+        print(f"   Detalle: {e}")
+        exit(1)
+
+    except ValueError as e:
+        print(f"❌ Error de validación: {e}")
+        exit(1)
+
+    except Exception as e:
+        print(f"❌ Error inesperado: {e}")
+        exit(1)
 
 
 if __name__ == "__main__":

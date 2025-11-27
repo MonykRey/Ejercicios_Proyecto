@@ -22,7 +22,7 @@ Funciones principales:
     get_frequency_result(): Crea resultado tipado.
     print_frequencies(): Presenta resultados.
 
-Autor: Bioinformática
+Autor: Mónica Reyes Ramírez
 Fecha: 2025-11-26
 Versión: 2.0 (Refactored)
 """

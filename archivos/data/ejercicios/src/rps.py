@@ -23,17 +23,17 @@ def determine_result(user: str, cpu: str) -> str:
     Determina si el usuario gana, pierde o empata en el juego de piedra, papel o tijera.
 
     Args:
-        user (str): La elección del usuario. Debe ser 'piedra', 'papel' o 'tijera'.
-        cpu (str): La elección de la CPU. Debe ser 'piedra', 'papel' o 'tijera'.
+        user (str): La elección del usuario. Debe ser 'rock', 'paper' o 'scissors'.
+        cpu (str): La elección de la CPU. Debe ser 'rock', 'paper' o 'scissors'.
 
     Returns:
         str: 'win' si el usuario gana, 'lose' si pierde, y 'draw' si empatan.
     """
     if user == cpu:
         return "draw"
-    elif (user == "piedra" and cpu == "tijera") or \
-         (user == "papel" and cpu == "piedra") or \
-         (user == "tijera" and cpu == "papel"):
+    elif (user == "rock" and cpu == "scissors") or \
+         (user == "paper" and cpu == "rock") or \
+         (user == "scissors" and cpu == "paper"):
         return "win"
     else:
         return "lose"
@@ -67,12 +67,17 @@ def main() -> None:
     print("Presiona ENTER sin escribir nada para salir.")
     print("-" * 40)
 
+    # Contadores de estadísticas
+    wins = 0
+    losses = 0
+    draws = 0
+
     while True:
-        user_input = input("Tu elección: ")
+        user_input = input("Tu elección: ").lower().strip()
         if not user_input:
             break
         if user_input not in VALID_CHOICES:
-            print("Elección no válida. Intenta de nuevo.")
+            print(f"❌ Elección no válida. Elige entre: {', '.join(VALID_CHOICES)}")
             continue
 
         cpu_choice, result = play(user_input)
@@ -82,11 +87,28 @@ def main() -> None:
 
         if result == "win":
             print("🎉✨🎆🎇🚀 ¡Ganaste!")
+            wins += 1
         elif result == "lose":
             print("😢 Perdiste. Inténtalo de nuevo.")
+            losses += 1
         else:
             print("🤝 Empate. Ambos eligieron lo mismo.")
+            draws += 1
 
+        print()  # Línea en blanco para claridad
+
+    # Mostrar estadísticas finales
+    print("-" * 40)
+    print("📊 ESTADÍSTICAS FINALES 📊")
+    print(f"✅ Victorias: {wins}")
+    print(f"❌ Derrotas: {losses}")
+    print(f"🤝 Empates: {draws}")
+    
+    total_games = wins + losses + draws
+    if total_games > 0:
+        win_rate = (wins / total_games) * 100
+        print(f"📈 Porcentaje de victorias: {win_rate:.1f}%")
+    
     print("Gracias por jugar. ¡Hasta luego!")
 
 

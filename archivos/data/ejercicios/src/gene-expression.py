@@ -261,16 +261,16 @@ def main():
         print_results(filtered, threshold)
 
     except FileNotFoundError as e:
-        print(f"❌ Error: El archivo '{args.file}' no existe.")
+        print(f" Error: El archivo '{args.file}' no existe.")
         print(f"   Detalle: {e}")
         exit(1)
 
     except ValueError as e:
-        print(f"❌ Error de validación: {e}")
+        print(f" Error de validación: {e}")
         exit(1)
 
     except Exception as e:
-        print(f"❌ Error inesperado: {e}")
+        print(f"Error inesperado: {e}")
         exit(1)
 
 

@@ -12,6 +12,7 @@ El alumno debe corregirlos sin cambiar el diseño general.
 No todos los errores estan identificados en los comentarios.
 """
 
+import argparse
 import pandas as pd
 
 
@@ -26,7 +27,7 @@ def load_expression_table(path):
         DataFrame: DataFrame con las columnas 'gene' y 'expression'.
     """
     # ERROR: el separador es incorrecto para un TSV (pista: debería ser tab)
-    df = pd.read_csv(path, sep=",") 
+    df = pd.read_csv(path, sep="\t") 
 
     # Validación básica de columnas
     if "gene" not in df.columns or "expression" not in df.columns:
@@ -41,7 +42,7 @@ def load_expression_table(path):
     return df
 
 
-def filter_gene(df, threshold):
+def filter_genes(df, threshold):
     """
     Filtra genes con expresión mayor o igual al threshold.
 
@@ -53,7 +54,7 @@ def filter_gene(df, threshold):
         DataFrame: Subconjunto con genes filtrados.
     """
     # ERROR: condición lógica equivocada (pista: revisar el operador de comparación)
-    filtered = df[df["expression"] <= threshold] 
+    filtered = df[df["expression"] >= threshold] 
 
     # Ordenar alfabéticamente por gene
     filtered = filtered.sort_values("gene")
@@ -81,8 +82,8 @@ def build_parser():
     parser.add_argument(
         "-t",
         "--threshold",
-        type=str,
-        default="0",
+        type=float,
+        default=0.0,
         help="Umbral mínimo de expresión (ej. 10.5)."
     )
 
@@ -110,4 +111,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main
+    main()
